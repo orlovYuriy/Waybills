@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Waybills</string>
+    <string name="n_order">№ Заказа</string>
+    <string name="customer">Клиент</string>
+    <string name="сustomer_addres">Адрес</string>
+    <string name="delivery_time">Время доставки</string>
+    <string name="arrival">Прибытие</string>
+    <string name="shipment">Время отгрузки</string>
+    <string name="number_good">№</string>
+    <string name="name_good">Наименование</string>
+    <string name="unit_good">Ед.из.</string>
+    <string name="сount_good">Кол.</string>
+    <string name="setting">Настройки</string>
+    <string name="setIpAddress">Указать IP базы</string>
+    <string name="input_ip">Введите IP</string>
+    <string name="ok">ОК</string>
+    <string name="cancel">Отмена</string>
+    <string name="input_user">Пользователь</string>
+    <string name="input_password">Пароль</string>
+    <string name="errorGetData">Произошла ошибка соединения IP, Пользователь или Пароль не верный!!!</string>
+    <string name="GPSAlertDialogTitle">GPS is setting</string>
+    <string name="GPSAlertDialogMessage">GPS is not enabled. Do you want to go to setting menu</string>
+    <string name="action_settings">Settings</string>
+    <string name="start_current_location_service">Начать геолокацию</string>
+    <string name="stop_current_location_service">Остановить геолокацию</string>
+    <string name="confirm_sipment">Подтвердить отгрузку товара?</string>
+    <string name="confirm_time_shipment">Время отгрузки установлено!</string>
+    <string name="your_key">Кдюч</string>
+    <string name="ShowRoute">Маршрут</string>
+</resources>

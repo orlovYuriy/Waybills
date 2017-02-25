@@ -1,0 +1,235 @@
+
+<!DOCTYPE html">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <style type="text/css">
+	  html { height: 100% }
+	  body { height: 100%; margin: 0px; padding: 0px }
+	  #map { height: 100% }
+	</style>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"  type="text/javascript"></script>
+
+    <script type="text/javascript">
+	var index = 1;
+	var MyMap, route;
+	var clusterer;
+	var PointArray = [];
+	var noclick = false;
+	// Метка для начальной точки маршрута.
+    var  currentPoint=null;
+
+	ymaps.ready(init);
+	function init(){
+		myMap = new ymaps.Map ("map", {
+			center: [55.75, 37.62],
+			zoom: 12,
+			controls: ['zoomControl', 'searchControl', 'typeSelector',  'fullscreenControl']
+		});
+		myMap.behaviors.enable('scrollZoom');
+		myMap.behaviors.disable('dblClickZoom');
+
+
+		// создадим кластеризатор и запретим приближать карту при клике на кластеры
+		clusterer = new ymaps.Clusterer({clusterDisableClickZoom: true, synchAdd: true});
+		myMap.geoObjects.add(clusterer);
+
+
+	}
+
+	function addCurrent(coordPosition){
+
+	    if (currentPoint) {
+            currentPoint.geometry.setCoordinates(coordPosition);
+        }
+        else{
+		currentPoint = new ymaps.Placemark(coordPosition, {
+			// Свойства
+			// Текст метки
+			iconContent: " - Точка"
+		}, {
+            // Опции.
+            // Необходимо указать данный тип макета.
+            iconLayout: 'default#image',
+            // Своё изображение иконки метки.
+            iconImageHref: 'marker.png',
+            // Размеры метки.
+            iconImageSize: [30, 42],
+            // Смещение левого верхнего угла иконки относительно
+            // её "ножки" (точки привязки).
+            iconImageOffset: [-5, -38]
+        });}
+		myMap.geoObjects.add(currentPoint);
+
+		myMap.panTo(coordPosition);
+
+	}
+
+	function setCenter(coordPosition) {
+			myMap.setCenter(coordPosition, 10, {
+		    checkZoomRange: true
+		});
+	}
+    function calRoute(options){
+        ymaps.route(options, {
+             mapStateAutoApply: true
+
+
+         }).then(function (route){
+        myMap.geoObjects.add(route);
+        // Зададим содержание иконок начальной и конечной точкам маршрута.
+        // С помощью метода getWayPoints() получаем массив точек маршрута.
+        // Массив транзитных точек маршрута можно получить с помощью метода getViaPoints.
+        var points = route.getWayPoints(),
+            lastPoint = points.getLength() - 1;
+
+        // Задаем стиль метки - иконки будут красного цвета, и
+        // их изображения будут растягиваться под контент.
+        //points.options.set('preset', 'islands#redStretchyIcon');
+
+        // Задаем контент меток в начальной и конечной точках.
+        //points.get(0).properties.set('iconContent', 'Точка отправления');
+        //points.get(0).options.set('preset', 'islands#greenStretchyIcon');
+        points.get(0).options.set({
+            // Опции.
+            // Необходимо указать данный тип макета.
+            iconLayout: 'default#image',
+            // Своё изображение иконки метки.
+            iconImageHref: 'start.png',
+            // Размеры метки.
+            iconImageSize: [30, 42],
+        });
+
+        //points.get(lastPoint).properties.set('iconContent', 'Точка прибытия');
+        //points.get(lastPoint).options.set('preset', 'islands#redStretchyIcon');
+        points.get(lastPoint).options.set({
+            // Опции.
+            // Необходимо указать данный тип макета.
+            iconLayout: 'default#image',
+            // Своё изображение иконки метки.
+            iconImageHref: 'finish.png',
+            // Размеры метки.
+            iconImageSize: [30, 42],
+        });
+
+    });
+    }
+	function calcRoute(options){
+		ymaps.route(options, {
+	        // Опции маршрутизатора
+	        mapStateAutoApply: true, // автоматически позиционировать карту
+	        avoidTrafficJams: true   // Учитывать пробки
+	    }).then(
+		    function (router) {
+		    route = router;
+		        myMap.geoObjects.add(route);
+
+		        //заполняем и сохраняем инфо про маршрут
+		        document.getElementById('RouteInfo').value = "Длина маршрута - " + route.getHumanLength() + ". Время - " + route.getHumanJamsTime();
+
+
+		    },
+		    function (error) {
+		        alert("Возникла ошибка: " + error.message);
+	    });
+	}
+
+	function Reset(){
+		// Удаляем все геообъекты на карте
+		myMap.geoObjects.removeAll();
+
+		PointArray = [];
+		index = 1;
+	}
+
+	function FindAdres(Adres){
+		Reset();
+		var myGeocoder = ymaps.geocode(Adres);
+		myGeocoder.then(
+			function (res){
+			var firstGeoObject = res.geoObjects.get(0);
+			if(firstGeoObject != null){
+				myMap.panTo(
+					// Координаты нового центра карты
+					firstGeoObject.geometry.getCoordinates(), {
+						/* Опции перемещения:
+						   разрешить уменьшать и затем увеличивать зум
+						   карты при перемещении между точками
+						*/
+						flying: true
+					}
+				);
+
+				myPlacemark = new ymaps.Placemark(firstGeoObject.geometry.getCoordinates(), {
+					// Свойства
+					// Текст метки
+					iconContent: Adres
+				}, {
+					// Опции
+					// Иконка метки будет растягиваться под ее контент
+					preset: 'islands#blueStretchyIcon'
+				});
+				myMap.geoObjects.add(myPlacemark);
+			}else{
+				alert("Ничего не найдено");}
+			}
+		);
+	}
+
+	function ReverseSearchAdres(CoordX, CoordY, Adres){
+		Reset();
+
+		var CoordPosition = [CoordX, CoordY];
+		myMap.panTo(
+		    // Координаты нового центра карты
+		    CoordPosition, {
+		        /* Опции перемещения:
+		           разрешить уменьшать и затем увеличивать зум
+		           карты при перемещении между точками
+		        */
+		        flying: true
+		    }
+		);
+
+		myPlacemark = new ymaps.Placemark(CoordPosition, {
+			// Свойства
+			// Текст метки
+			iconContent: Adres
+		}, {
+			// Опции
+			// Иконка метки будет растягиваться под ее контент
+			preset: 'islands#blueStretchyIcon'
+		});
+		myMap.geoObjects.add(myPlacemark);
+	}
+
+	function addToPointArray(CoordX, CoordY, ID, Text){
+		var point = new ymaps.GeoObject({
+		    geometry: {type: "Point", coordinates: [CoordX, CoordY]},
+		    properties: {
+		        clusterCaption: ID,
+		        balloonContentBody: Text
+		    }
+			});
+		PointArray.push(point);
+	}
+
+	function drawCluster(){
+		clusterer.add(PointArray);
+		myMap.geoObjects.add(clusterer);
+	}
+
+
+    </script>
+</head>
+
+<body>
+    <div id="map" style="width:100%; height:100%"></div>
+    <input type="hidden" id="CoordX" name="CoordX" value="0"></input>
+    <input type="hidden" id="CoordY" name="CoordY" value="0"></input>
+    <input type="hidden" id="RouteInfo" name="RouteInfo" value=""></input>
+    <input type="hidden" id="WebClientOperation" name="WebClientOperation" value="0"></input>
+    <input type="hidden" id="WebClient" name="WebClient" onclick="WebClientClick();"></input>
+</body>
+</html>

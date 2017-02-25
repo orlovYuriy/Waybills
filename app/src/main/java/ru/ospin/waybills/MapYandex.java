@@ -42,7 +42,7 @@ public class MapYandex extends AppCompatActivity implements View.OnClickListener
 
         btnCreateRoute = (Button) findViewById(R.id.btnCreateRoute);
         btnCreateRoute.setOnClickListener(this);
-        btnCreateRoute.getBackground().setAlpha(100);
+        //btnCreateRoute.getBackground().setAlpha(100);
 
         FragmentManager fm = getSupportFragmentManager();
         fragment = fm.findFragmentById(R.id.container);
